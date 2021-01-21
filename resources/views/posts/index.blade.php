@@ -21,8 +21,6 @@
     </style>
 </head>
 <body class="antialiased">
-<h1>{{ $post->title }}</h1>
-<p>{{ $post->body }}</p>
 <ul>
     @foreach ($posts as $post)
         <li>
