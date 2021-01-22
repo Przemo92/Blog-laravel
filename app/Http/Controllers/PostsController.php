@@ -21,4 +21,12 @@ class PostsController extends Controller
         $post = Post::find($id);
         return view('posts.show')->with('post', $post);
     }
+    public function store(Request $request)
+    {
+        $request->user()->posts()->create($request->only([
+            'published_at',
+            'title',
+            'body',
+        ]));
+    }
 }

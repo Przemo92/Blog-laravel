@@ -15,4 +15,8 @@ class Post extends Model
     {
         return $query->whereNotNull('published_at')->where('published_at', '<=', Carbon::now());
     }
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
 }
