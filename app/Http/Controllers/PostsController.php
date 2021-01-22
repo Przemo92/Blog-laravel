@@ -23,6 +23,15 @@ class PostsController extends Controller
     }
     public function store(Request $request)
     {
+        $request->validate([
+            'title' => [
+                'required',
+                'unique:posts',
+            ],
+            'body' => ['min:3', 'nullable'],
+            'published_at' => ['date', 'nullable'],
+        ]);
+
         $request->user()->posts()->create($request->only([
             'published_at',
             'title',
