@@ -20,6 +20,8 @@ Route::get('/posts/{post}', [App\Http\Controllers\PostsController::class, 'show'
 Route::get('/posts', [App\Http\Controllers\PostsController::class, 'index']);
 Route::middleware('auth')->group(function () {
     Route::post('/posts', [App\Http\Controllers\PostsController::class, 'store']);
+    Route::patch('/posts/{post}', [App\Http\Controllers\PostsController::class, 'update']);
+    Route::delete('/posts/{post}', [App\Http\Controllers\PostsController::class, 'destroy']);
 });
 
 Auth::routes();

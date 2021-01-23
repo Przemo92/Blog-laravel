@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PostRequest;
 use App\Models\Post;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -21,21 +22,28 @@ class PostsController extends Controller
         $post = Post::find($id);
         return view('posts.show')->with('post', $post);
     }
-    public function store(Request $request)
+    public function store(PostRequest $request)
     {
-        $request->validate([
-            'title' => [
-                'required',
-                'unique:posts',
-            ],
-            'body' => ['min:3', 'nullable'],
-            'published_at' => ['date', 'nullable'],
-        ]);
-
         $request->user()->posts()->create($request->only([
             'published_at',
             'title',
             'body',
         ]));
+    }
+    public function update(PostRequest $request, $id)
+    {
+        $post = Post::find($id);
+
+        $post->update($request->only([
+            'published_at',
+            'title',
+            'body',
+        ]));
+    }
+    public function destroy($id)
+    {
+        $post = Post::find($id);
+
+        $post->delete();
     }
 }
