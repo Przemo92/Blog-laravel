@@ -33,6 +33,7 @@ class PostsController extends Controller
     public function update(PostRequest $request, $id)
     {
         $post = Post::find($id);
+        $this->authorize('update', $post);
 
         $post->update($request->only([
             'published_at',
@@ -44,6 +45,7 @@ class PostsController extends Controller
     {
         $post = Post::find($id);
 
+        $this->authorize('delete', $post);
         $post->delete();
     }
 }

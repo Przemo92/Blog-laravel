@@ -3,6 +3,7 @@
 namespace Tests\Feature\Authenticated;
 
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 
@@ -82,12 +83,14 @@ class PostsTest extends AuthenticatedTestCase
         $response->assertSessionHasErrors('published_at');
     }
     /** @test */
-    public function a_post_can_be_updated()
+    public function a_user_can_update_their_own_posts()
     {
-        $this->withoutExceptionHandling();
-        $post = Post::factory()->create();
+        $fred = User::factory()->create();
+        $post = Post::factory()->create([
+            'user_id' => $fred->id,
+        ]);
 
-        $this->patch("/posts/{$post->id}" , [
+        $this->actingAs($fred)->patch("/posts/{$post->id}" , [
             'published_at' => '2019-11-19 12:00:00',
             'title' => 'Odebrał żelazko zamiast telefonu',
             'body' => 'Miał pomóc żonie, a skończyło się tragedią.',
@@ -186,14 +189,46 @@ class PostsTest extends AuthenticatedTestCase
         $response->assertSessionHasNoErrors('title');
     }
     /** @test */
-    public function a_post_can_be_deleted()
+    public function admin_can_delete_posts()
     {
+        $admin = User::factory()->create([
+            'email' => 'admin@example.com',
+        ]);
         $post = Post::factory()->create();
 
-        $this->delete("/posts/{$post->id}");
+        $this->actingAs($admin)->delete("/posts/{$post->id}");
 
         $this->assertDatabaseMissing('posts', [
             'id' => $post->id,
         ]);
+    }
+    /** @test */
+    public function a_user_cannot_update_other_users_posts()
+    {
+        $fred = User::factory()->create();
+        $barney = User::factory()->create();
+        $post = Post::factory()->create([
+            'user_id' => $fred->id,
+        ]);
+
+        $response = $this->actingAs($barney)->patch("/posts/{$post->id}" , [
+            'published_at' => '2019-11-19 12:00:00',
+            'title' => 'Odebrał żelazko zamiast telefonu',
+            'body' => 'Miał pomóc żonie, a skończyło się tragedią.',
+        ]);
+
+        $response->assertForbidden();
+    }
+    /** @test */
+    public function non_admin_users_cannot_delete_posts()
+    {
+        $user = User::factory()->create([
+            'email' => 'user@example.com',
+        ]);
+        $post = Post::factory()->create();
+
+        $response = $this->actingAs($user)->delete("/posts/{$post->id}");
+
+        $response->assertForbidden();
     }
 }
